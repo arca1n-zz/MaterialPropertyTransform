@@ -23,6 +23,8 @@ class GameViewController: UIViewController {
         cameraNode.camera = SCNCamera()
         scene.rootNode.addChildNode(cameraNode)
         
+        scene.background.contents = ["art.scnassets/right.jpg", "art.scnassets/left.jpg", "art.scnassets/top.jpg", "art.scnassets/bottom.jpg", "art.scnassets/back.jpg", "art.scnassets/front.jpg"]
+        
         // place the camera
         cameraNode.position = SCNVector3(x: 0, y: 0, z: 15)
         
@@ -42,9 +44,63 @@ class GameViewController: UIViewController {
         
         // retrieve the ship node
         let ship = scene.rootNode.childNodeWithName("ship", recursively: true)!
+        // Find the emitter
+        let emitter = scene.rootNode.childNodeWithName("emitter", recursively: true)!
         
+        // Create afterburner flames
+        
+        let fire = UIImage(named: "art.scnassets/fire.png")
+        let fireAlpha = UIImage(named: "art.scnassets/alpha.png")
+        
+        let sphere1 = SCNCone(topRadius: 0.001, bottomRadius: 2, height: 6)
+        let sphereNode1 = SCNNode(geometry: sphere1)
+        sphere1.firstMaterial = SCNMaterial()
+        sphere1.firstMaterial?.diffuse.contents = fire
+        sphere1.firstMaterial?.emission.contents = UIColor.orangeColor()
+        //sphere1.firstMaterial?.transparent.contents = fireAlpha
+        sphere1.firstMaterial?.doubleSided = true;
+        sphere1.firstMaterial?.transparencyMode = SCNTransparencyMode.AOne
+        sphereNode1.scale = SCNVector3Make(1, 2, 1.2)
+        sphereNode1.position = SCNVector3Make(3.2, 3, 0)
+        emitter.addChildNode(sphereNode1);
+        
+        let sphere2 = SCNCone(topRadius: 0.001, bottomRadius: 1.8, height: 6)
+        let sphereNode2 = SCNNode(geometry: sphere2)
+        sphere2.firstMaterial?.emission.contents = UIColor.orangeColor()
+        sphere2.firstMaterial?.diffuse.contents = fire
+        //sphere2.firstMaterial?.transparent.contents = fireAlpha
+        sphere2.firstMaterial?.doubleSided = true;
+        sphere2.firstMaterial?.transparencyMode = SCNTransparencyMode.AOne
+        sphereNode2.scale = SCNVector3Make(1, 2, 1.2)
+        sphereNode2.position = SCNVector3Make(-3.2, 3, 0)
+        emitter.addChildNode(sphereNode2);
+        
+        sphere1.firstMaterial?.locksAmbientWithDiffuse = true
+        sphere2.firstMaterial?.locksAmbientWithDiffuse = true
+        sphere2.firstMaterial?.transparency = 0.5
+        sphere1.firstMaterial?.transparency = 0.5
+        
+        
+        let animation = CABasicAnimation(keyPath: "contentsTransform")
+        animation.duration = 0.5
+       
+        var transform = SCNMatrix4MakeTranslation(0.5, 0.5, 1)
+        animation.fromValue = NSValue(SCNMatrix4:SCNMatrix4Identity)
+        animation.toValue = NSValue(SCNMatrix4: transform)
+        
+        animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
+        animation.repeatCount = FLT_MAX
+        
+        
+        sphere1.firstMaterial?.diffuse.addAnimation(animation, forKey: "transformAnimation")
+        sphere2.firstMaterial?.diffuse.addAnimation(animation, forKey: "transformAnimation")
+        /*sphere1.firstMaterial?.ambient.addAnimation(animation, forKey: "transformAnimation")
+        sphere2.firstMaterial?.ambient.addAnimation(animation, forKey: "transformAnimation")
+        sphere1.firstMaterial?.transparent.addAnimation(animation, forKey: "transformAnimation")
+        sphere2.firstMaterial?.transparent.addAnimation(animation, forKey: "transformAnimation")*/
+    
         // animate the 3d object
-        ship.runAction(SCNAction.repeatActionForever(SCNAction.rotateByX(0, y: 2, z: 0, duration: 1)))
+        //ship.runAction(SCNAction.repeatActionForever(SCNAction.rotateByX(0, y: 2, z: 0, duration: 1)))
         
         // retrieve the SCNView
         let scnView = self.view as SCNView
